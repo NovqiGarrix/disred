@@ -10,58 +10,32 @@ app = Flask(__name__)
 # { dbname: "nama_database" }
 
 @app.route("/", methods=["GET"])
-def getAll():
-    requestParams = request.args
-    if requestParams == None:
-        return jsonify({ "error": "Nama database tidak ada", "data": None })
+def root():
+    return jsonify("OK")
 
-    if "dbname" not in requestParams:
-        return jsonify({ "error": "Nama database tidak ada", "data": None })
-
-    nama_database = requestParams["dbname"]
-    db = DiSred.DiSred(nama_database)
+@app.route("/<dbname>/", methods=["GET"])
+def getAll(dbname: str):
+    db = DiSred.DiSred(dbname)
     return jsonify({ "error": None, "data": db.get_all() })
 
-@app.route("/<key>/one", methods=["GET"])
-def get(key: str):
-    requestParams = request.args
-    if requestParams == None:
-        return jsonify({ "error": "Nama database tidak ada", "data": None })
+@app.route("/<dbname>/one", methods=["POST"])
+def get(dbname: str):
+    requestBody = request.get_json(force=True)
+    if "key" not in requestBody:
+        return jsonify({ "error": "Invalid Key atau Key nya tidak ada.", "data": None })
 
-    if "dbname" not in requestParams:
-        return jsonify({ "error": "Nama database tidak ada", "data": None })
-
-    nama_database = requestParams["dbname"]
-    db = DiSred.DiSred(nama_database)
-
+    key = requestBody["key"]
+    db = DiSred.DiSred(dbname)
     return jsonify({ "error": None, "data": db.get(key) })
 
-@app.route("/keys", methods=["GET"])
-def get_keys():
-    requestParams = request.args
-    if requestParams == None:
-        return jsonify({ "error": "Nama database tidak ada", "data": None })
-
-    if "dbname" not in requestParams:
-        return jsonify({ "error": "Nama database tidak ada", "data": None })
-
-    nama_database = requestParams["dbname"]
-    db = DiSred.DiSred(nama_database)
-
+@app.route("/<dbname>/keys", methods=["GET"])
+def get_keys(dbname: str):
+    db = DiSred.DiSred(dbname)
     return jsonify({ "error": None, "data": db.get_keys() })
 
-@app.route("/", methods=["POST"])
-def insert():
-    requestParams = request.args
-    if requestParams == None:
-        return jsonify({ "error": "Nama database tidak ada", "data": None })
-
-    if "dbname" not in requestParams:
-        return jsonify({ "error": "Nama database tidak ada", "data": None })
-
-    nama_database = requestParams["dbname"]
-    db = DiSred.DiSred(nama_database)
-
+@app.route("/<dbname>/", methods=["POST"])
+def insert(dbname: str):
+    db = DiSred.DiSred(dbname)
     if "key" not in request.get_json(force=True):
         return jsonify({ "error": "Masukkan key di request body", "data": None })
     
@@ -72,32 +46,14 @@ def insert():
     value = request.get_json(force=True)["value"]
     return jsonify({ "error": None, "data": db.insert(key, value) })
 
-@app.route("/<key>", methods=["DELETE"])
-def delete(key):
-    requestParams = request.args
-    if requestParams == None:
-        return jsonify({ "error": "Nama database tidak ada", "data": None })
-
-    if "dbname" not in requestParams:
-        return jsonify({ "error": "Nama database tidak ada", "data": None })
-
-    nama_database = requestParams["dbname"]
-    db = DiSred.DiSred(nama_database)
-
+@app.route("/<dbname>/<key>", methods=["DELETE"])
+def delete(dbname: str, key: str):
+    db = DiSred.DiSred(dbname)
     return jsonify({ "error": None, "data": db.delete(key) })
 
-@app.route("/", methods=["DELETE"])
-def flush():
-    requestParams = request.args
-    if requestParams == None:
-        return jsonify({ "error": "Nama database tidak ada", "data": None })
-
-    if "dbname" not in requestParams:
-        return jsonify({ "error": "Nama database tidak ada", "data": None })
-
-    nama_database = requestParams["dbname"]
-    db = DiSred.DiSred(nama_database)
-
+@app.route("/<dbname>/", methods=["DELETE"])
+def flush(dbname: str):
+    db = DiSred.DiSred(dbname)
     return jsonify({ "error": None, "data": db.flush() })
 
 
